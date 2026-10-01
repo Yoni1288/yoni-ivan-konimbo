@@ -5,19 +5,21 @@ import { getLowestPrice } from "../utils/product-display"
 const REPLACE_TIMEOUT_MS: number = 30_000
 
 const toProductCreateInput = (product: Product): Prisma.ProductCreateInput => {
+  const { id, title, handle, description, thumbnail, created_at, collection, images, tags, options } = product
+
   return {
-    id: product.id,
-    title: product.title,
-    handle: product.handle,
-    description: product.description,
-    thumbnail: product.thumbnail,
-    createdAt: new Date(product.created_at),
+    id,
+    title,
+    handle,
+    description,
+    thumbnail,
+    createdAt: new Date(created_at),
     minPrice: getLowestPrice(product)?.amount ?? 0,
-    collection: { connectOrCreate: { where: { id: product.collection.id }, create: product.collection } },
-    images: { create: product.images.map((image, index) => ({ url: image.url, position: index })) },
-    tags: { create: product.tags.map((tag) => ({ tag: { connectOrCreate: { where: { value: tag.value }, create: { value: tag.value } } } })) },
+    collection: { connectOrCreate: { where: { id: collection.id }, create: collection } },
+    images: { create: images.map((image, index) => ({ url: image.url, position: index })) },
+    tags: { create: tags.map((tag) => ({ tag: { connectOrCreate: { where: { value: tag.value }, create: { value: tag.value } } } })) },
     options: {
-      create: product.options.map((option, index) => ({
+      create: options.map((option, index) => ({
         id: option.id,
         title: option.title,
         position: index,
@@ -37,14 +39,16 @@ const toVariantOptionLinks = (options: ProductOption[], variantTitle: string): P
 }
 
 const toVariantCreateInput = (product: Product, variant: ProductVariant): Prisma.VariantCreateInput => {
+  const { id, title, sku, inventory_quantity, prices } = variant
+
   return {
-    id: variant.id,
-    title: variant.title,
-    sku: variant.sku,
-    inventoryQuantity: variant.inventory_quantity,
+    id,
+    title,
+    sku,
+    inventoryQuantity: inventory_quantity,
     product: { connect: { id: product.id } },
-    prices: { create: variant.prices.map((price) => ({ amount: price.amount, currencyCode: price.currency_code })) },
-    optionValues: { create: toVariantOptionLinks(product.options, variant.title) },
+    prices: { create: prices.map((price) => ({ amount: price.amount, currencyCode: price.currency_code })) },
+    optionValues: { create: toVariantOptionLinks(product.options, title) },
   }
 }
 

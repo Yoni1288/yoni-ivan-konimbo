@@ -120,3 +120,68 @@ model VariantPrice {
   @@unique([variantId, currencyCode])
   @@map("variant_prices")
 }
+
+model User {
+  id           Int      @id @default(autoincrement())
+  userName     String   @unique @map("user_name")
+  passwordHash String   @map("password_hash")
+  email        String?  @unique
+  orders       Order[]
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("users")
+}
+
+model Order {
+  id          String @id @default(cuid())
+  orderNumber String @unique @map("order_number") // e.g. "GS-10482"
+  userId      Int    @map("user_id")
+  user        User   @relation(fields: [userId], references: [id])
+
+  // Shipping address
+  firstName  String  @map("first_name")
+  lastName   String  @map("last_name")
+  address1   String  @map("address_1")
+  address2   String? @map("address_2")
+  city       String
+  postalCode String  @map("postal_code")
+  country    String  @db.Char(2) // "IL", "US", ...
+  phone      String?
+
+  // Totals (minor units, e.g. 29900 = ₪299.00)
+  currencyCode  String @default("ILS") @map("currency_code")
+  subtotal      Int
+  shippingTotal Int    @default(0) @map("shipping_total")
+  total         Int
+
+  status    OrderStatus @default(PENDING)
+  items     OrderItem[]
+  createdAt DateTime    @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@map("orders")
+}
+
+// Items are snapshots with no foreign keys to the catalog, so reseeding products never changes or deletes order history.
+model OrderItem {
+  id           String @id @default(cuid())
+  orderId      String @map("order_id")
+  order        Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId    String @map("product_id") // "prod_01"
+  variantId    String @map("variant_id") // "var_01a"
+  title        String // snapshot: "Classic Wireless Headphones"
+  variantTitle String @map("variant_title") // snapshot: "Black"
+  sku          String // snapshot: "HP-BLK-01"
+  unitPrice    Int    @map("unit_price") // 29900 = ₪299.00
+  quantity     Int
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  CANCELLED
+}

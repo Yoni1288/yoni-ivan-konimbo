@@ -32,15 +32,16 @@ const SwatchDot = ({ value }: { value: string }): React.JSX.Element | null => {
 }
 
 export const OptionPicker = ({ option, selectedValue, isValueAvailable, onSelect }: OptionPickerProps): React.JSX.Element => {
-  const showSwatches: boolean = isSwatchOption(option.title)
+  const { title, values } = option
+  const showSwatches: boolean = isSwatchOption(title)
 
   return (
     <fieldset>
       <legend className="text-sm text-muted">
-        {option.title} <span className="font-medium text-ink">{selectedValue}</span>
+        {title} <span className="font-medium text-ink">{selectedValue}</span>
       </legend>
       <div className="mt-3 flex flex-wrap gap-2">
-        {option.values.map((value) => {
+        {values.map((value) => {
           const isSelected: boolean = value === selectedValue
           const state: OptionValueState = getValueState(isSelected, isValueAvailable(value))
           return (

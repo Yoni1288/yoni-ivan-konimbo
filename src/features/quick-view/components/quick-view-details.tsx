@@ -9,14 +9,15 @@ import { OptionPicker } from "./option-picker"
 import { StockPill } from "./stock-pill"
 
 export const QuickViewDetails = ({ product, titleId, onAddedToCart }: QuickViewDetailsProps): React.JSX.Element => {
+  const { collection, title, description, options } = product
   const { selectedOptions, selectedVariant, selectOption, isValueAvailable } = useVariantSelection(product)
   const price: Price | undefined = selectedVariant?.prices[0]
 
   return (
     <div className="flex h-full flex-col">
-      <p className="text-xs tracking-widest text-muted uppercase">{product.collection.title}</p>
+      <p className="text-xs tracking-widest text-muted uppercase">{collection.title}</p>
       <h2 id={titleId} className="mt-1 pr-16 font-serif text-3xl leading-tight md:text-4xl">
-        {product.title}
+        {title}
       </h2>
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -24,10 +25,10 @@ export const QuickViewDetails = ({ product, titleId, onAddedToCart }: QuickViewD
         <StockPill quantity={selectedVariant?.inventory_quantity ?? 0} />
       </div>
 
-      <p className="mt-5 border-b border-line pb-6 text-sm leading-relaxed text-ink/80">{product.description}</p>
+      <p className="mt-5 border-b border-line pb-6 text-sm leading-relaxed text-ink/80">{description}</p>
 
       <div className="mt-6 flex flex-col gap-6">
-        {product.options.map((option) => (
+        {options.map((option) => (
           <OptionPicker
             key={option.id}
             option={option}

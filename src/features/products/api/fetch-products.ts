@@ -6,22 +6,23 @@ import type { ProductFilters } from "../products.types"
 const MINOR_UNITS_PER_SHEKEL: number = 100
 
 export const fetchProducts = (filters: ProductFilters): Promise<ProductsResponse> => {
-  const params = new URLSearchParams({ offset: String(filters.offset) })
+  const { offset, collection, sort, priceFrom, priceTo } = filters
+  const params = new URLSearchParams({ offset: String(offset) })
 
-  if (filters.collection) {
-    params.set("collection", filters.collection)
+  if (collection) {
+    params.set("collection", collection)
   }
 
-  if (filters.sort !== "featured") {
-    params.set("sort", filters.sort)
+  if (sort !== "featured") {
+    params.set("sort", sort)
   }
 
-  if (filters.priceFrom !== undefined) {
-    params.set("min_price", String(filters.priceFrom * MINOR_UNITS_PER_SHEKEL))
+  if (priceFrom !== undefined) {
+    params.set("min_price", String(priceFrom * MINOR_UNITS_PER_SHEKEL))
   }
 
-  if (filters.priceTo !== undefined) {
-    params.set("max_price", String(filters.priceTo * MINOR_UNITS_PER_SHEKEL))
+  if (priceTo !== undefined) {
+    params.set("max_price", String(priceTo * MINOR_UNITS_PER_SHEKEL))
   }
 
   return apiGet(`/api/products?${params}`, productsResponseSchema)

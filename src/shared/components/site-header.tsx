@@ -10,9 +10,9 @@ export const SiteHeader = (): React.JSX.Element => {
           Goodsmith
         </Link>
         <div className="flex items-center">
-          <button type="button" aria-label="Account" className="flex size-11 items-center justify-center rounded-full hover:bg-black/5">
+          <Link href="/login" aria-label="Sign in" className="flex size-11 items-center justify-center rounded-full hover:bg-black/5">
             <User className="size-5" strokeWidth={1.5} />
-          </button>
+          </Link>
           <CartButton />
         </div>
       </div>

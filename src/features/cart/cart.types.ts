@@ -35,5 +35,7 @@ export type CartEmptyStateProps = {
 export type CartSummaryProps = {
   subtotal: number
   currencyCode: string
+  checkoutHref: string
+  onCheckout: () => void
   onContinueShopping: () => void
 }

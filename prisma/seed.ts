@@ -1,6 +1,9 @@
 import { PrismaPg } from "@prisma/adapter-pg"
 import { z } from "zod"
 import { PrismaClient } from "../src/generated/prisma/client"
+import { seedAdminEnvSchema } from "../src/features/auth/auth.schemas"
+import type { SeedAdmin } from "../src/features/auth/auth.types"
+import { upsertAdminUser } from "../src/features/auth/repositories/users-seed.repository"
 import { productSchema } from "../src/features/products/products.schemas"
 import { replaceAllProducts } from "../src/features/products/repositories/products-seed.repository"
 import productsData from "../mock-data/products.json"
@@ -15,4 +18,17 @@ const seedProducts = async (): Promise<void> => {
   console.log(`Seeded ${products.length} products.`)
 }
 
-seedProducts().finally(() => prisma.$disconnect())
+const seedAdminUser = async (admin: SeedAdmin): Promise<void> => {
+  await upsertAdminUser(prisma, admin)
+  console.log(`Seeded admin user "${admin.userName}".`)
+}
+
+// Admin credentials come from SEED_ADMIN_* in .env, so no password is committed.
+// They are validated before anything is written, so a missing or short value fails without touching the database.
+const seed = async (): Promise<void> => {
+  const admin: SeedAdmin = seedAdminEnvSchema.parse(process.env)
+  await seedProducts()
+  await seedAdminUser(admin)
+}
+
+seed().finally(() => prisma.$disconnect())

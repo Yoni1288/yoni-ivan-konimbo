@@ -7,6 +7,7 @@ import { useCartStore } from "../store/cart.store"
 import { getLineTotal } from "../utils/cart-totals"
 
 export const CartLineItem = ({ line, index }: CartLineItemProps): React.JSX.Element => {
+  const { variantId, title, variantTitle, unitPrice, currencyCode, quantity, inventoryQuantity } = line
   const updateQuantity: (variantId: string, quantity: number) => void = useCartStore((state) => state.updateQuantity)
   const removeItem: (variantId: string) => void = useCartStore((state) => state.removeItem)
 
@@ -15,14 +16,14 @@ export const CartLineItem = ({ line, index }: CartLineItemProps): React.JSX.Elem
       <div className={cn("h-24 w-20 shrink-0 rounded-lg", getTileClass(index))} />
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex items-start justify-between gap-3">
-          <p className="text-sm font-medium">{line.title}</p>
-          <p className="shrink-0 text-sm font-semibold">{formatPrice(getLineTotal(line), line.currencyCode)}</p>
+          <p className="text-sm font-medium">{title}</p>
+          <p className="shrink-0 text-sm font-semibold">{formatPrice(getLineTotal(line), currencyCode)}</p>
         </div>
-        <p className="mt-1 text-xs text-muted">{line.variantTitle}</p>
-        <p className="mt-0.5 text-xs text-muted">{formatPrice(line.unitPrice, line.currencyCode)} each</p>
+        <p className="mt-1 text-xs text-muted">{variantTitle}</p>
+        <p className="mt-0.5 text-xs text-muted">{formatPrice(unitPrice, currencyCode)} each</p>
         <div className="mt-3 flex items-center justify-between gap-3">
-          <QuantityStepper quantity={line.quantity} max={line.inventoryQuantity} onChange={(quantity) => updateQuantity(line.variantId, quantity)} />
-          <button type="button" onClick={() => removeItem(line.variantId)} className="min-h-11 px-1 text-xs underline underline-offset-4 hover:text-muted">
+          <QuantityStepper quantity={quantity} max={inventoryQuantity} onChange={(newQuantity) => updateQuantity(variantId, newQuantity)} />
+          <button type="button" onClick={() => removeItem(variantId)} className="min-h-11 px-1 text-xs underline underline-offset-4 hover:text-muted">
             Remove
           </button>
         </div>

@@ -9,6 +9,7 @@
 
   --grid-template-columns-sidebar: 180px 1fr;
   --grid-template-columns-pagination: 1fr auto 1fr;
+  --grid-template-columns-checkout: minmax(0, 1fr) 24rem;
 
   --color-canvas: #f4f3ef;
   --color-ink: #1a1a1a;

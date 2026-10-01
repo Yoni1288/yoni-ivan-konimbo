@@ -6,6 +6,7 @@ const serverEnvSchema = z.object({
   DATABASE_URL: z.url(),
   REDIS_URL: z.url(),
   APP_URL: z.url(),
+  JWT_SECRET: z.string().min(32),
 })
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>

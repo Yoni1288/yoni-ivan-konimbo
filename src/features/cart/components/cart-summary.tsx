@@ -1,8 +1,9 @@
 import { ArrowRight } from "lucide-react"
+import Link from "next/link"
 import { formatPrice } from "@/shared/utils/format-price"
 import type { CartSummaryProps } from "../cart.types"
 
-export const CartSummary = ({ subtotal, currencyCode, onContinueShopping }: CartSummaryProps): React.JSX.Element => {
+export const CartSummary = ({ subtotal, currencyCode, checkoutHref, onCheckout, onContinueShopping }: CartSummaryProps): React.JSX.Element => {
   return (
     <div className="border-t border-line bg-canvas px-6 pt-5 pb-6">
       <dl className="space-y-2 text-sm">
@@ -19,10 +20,14 @@ export const CartSummary = ({ subtotal, currencyCode, onContinueShopping }: Cart
           <dd className="text-xl font-semibold">{formatPrice(subtotal, currencyCode)}</dd>
         </div>
       </dl>
-      <button type="button" className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-ink text-sm font-medium text-white transition-opacity hover:opacity-90">
+      <Link
+        href={checkoutHref}
+        onClick={onCheckout}
+        className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-ink text-sm font-medium text-white transition-opacity hover:opacity-90"
+      >
         Checkout
         <ArrowRight className="size-4" strokeWidth={1.5} />
-      </button>
+      </Link>
       <button type="button" onClick={onContinueShopping} className="mx-auto mt-2 flex min-h-11 items-center px-2 text-sm underline underline-offset-4 hover:text-muted">
         Continue shopping
       </button>

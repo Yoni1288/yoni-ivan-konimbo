@@ -1,7 +1,5 @@
 import type { Metadata } from "next"
 import { Inter, Instrument_Serif } from "next/font/google"
-import { SiteFooter } from "@/shared/components/site-footer"
-import { SiteHeader } from "@/shared/components/site-header"
 import { cn } from "@/shared/utils/cn"
 import { Providers } from "./providers"
 import "./globals.css"
@@ -18,11 +16,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }): React.JSX.Elem
   return (
     <html lang="en" className={cn(inter.variable, instrumentSerif.variable)}>
       <body className="flex min-h-screen flex-col bg-canvas font-sans text-ink antialiased">
-        <Providers>
-          <SiteHeader />
-          <div className="flex-1">{children}</div>
-          <SiteFooter />
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   )

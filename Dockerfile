@@ -13,7 +13,7 @@ COPY . .
 # next build imports the route modules, which validate env at import time, and .env isn't in the image.
 # Placeholders are safe: Prisma and Redis only connect on first use, and Compose supplies the real values at runtime.
 # Scoped to this stage only; the runner stage doesn't inherit them.
-ENV DATABASE_URL=postgresql://build:build@localhost:5432/build REDIS_URL=redis://localhost:6379 APP_URL=http://localhost:3000
+ENV DATABASE_URL=postgresql://build:build@localhost:5432/build REDIS_URL=redis://localhost:6379 APP_URL=http://localhost:3000 JWT_SECRET=build-only-placeholder-secret-never-used-at-runtime
 RUN pnpm prisma generate && pnpm build
 
 FROM base AS runner

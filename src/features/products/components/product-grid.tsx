@@ -50,8 +50,10 @@ export const ProductGrid = (): React.JSX.Element => {
     return <GridMessage title="Couldn't load products" detail="Please refresh the page to try again." />
   }
 
+  const { products, offset, limit, count } = data
+
   // A stale or hand-edited URL can point past the last page; offer a way back instead of a dead end.
-  if (!data.products.length && filters.offset) {
+  if (!products.length && filters.offset) {
     return (
       <GridMessage title="This page is empty" detail="There are fewer products than this page expects.">
         <button type="button" onClick={() => setOffset(0)} className="mt-4 h-11 rounded-full border border-ink px-6 text-sm font-medium transition-colors hover:bg-ink hover:text-white">
@@ -61,18 +63,18 @@ export const ProductGrid = (): React.JSX.Element => {
     )
   }
 
-  if (!data.products.length) {
+  if (!products.length) {
     return <GridMessage title="No products found" detail="Try a different search or filter." />
   }
 
   return (
     <section aria-label="Products">
       <div className={cn(GRID_CLASSES, "transition-opacity", isPlaceholderData && "opacity-60")} aria-busy={isPlaceholderData}>
-        {data.products.map((product, index) => (
+        {products.map((product, index) => (
           <ProductCard key={product.id} product={product} index={index} onQuickView={setQuickViewProduct} />
         ))}
       </div>
-      <CatalogPagination offset={data.offset} limit={data.limit} shown={data.products.length} total={data.count} onOffsetChange={setOffset} />
+      <CatalogPagination offset={offset} limit={limit} shown={products.length} total={count} onOffsetChange={setOffset} />
       {quickViewProduct && <QuickViewDialog key={quickViewProduct.id} product={quickViewProduct} onClose={() => setQuickViewProduct(null)} />}
     </section>
   )

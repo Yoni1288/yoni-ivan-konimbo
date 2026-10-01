@@ -44,7 +44,7 @@ export const productListQuerySchema = z
     min_price: priceAmountSchema.optional(),
     max_price: priceAmountSchema.optional(),
   })
-  .refine((query) => query.min_price === undefined || query.max_price === undefined || query.min_price <= query.max_price, {
+  .refine(({ min_price, max_price }) => min_price === undefined || max_price === undefined || min_price <= max_price, {
     message: "min_price must not be greater than max_price",
     path: ["max_price"],
   })
@@ -76,7 +76,7 @@ const priceInputSchema = z
   .pipe(z.coerce.number<string>({ error: "Enter a whole number" }).int("Enter a whole number").min(0, "Enter 0 or more").optional())
 
 // The sidebar inputs are whole shekels, like the prices shown on the cards.
-export const priceRangeFormSchema = z.object({ from: priceInputSchema, to: priceInputSchema }).refine((range) => range.from === undefined || range.to === undefined || range.from <= range.to, {
+export const priceRangeFormSchema = z.object({ from: priceInputSchema, to: priceInputSchema }).refine(({ from, to }) => from === undefined || to === undefined || from <= to, {
   message: "“From” must not be more than “To”",
   path: ["to"],
 })

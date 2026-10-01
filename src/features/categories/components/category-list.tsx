@@ -57,24 +57,23 @@ export const CategoryList = (): React.JSX.Element => {
     return <CategoryMessage>Couldn&apos;t load categories.</CategoryMessage>
   }
 
-  if (!data.collections.length) {
+  const { collections, total } = data
+
+  if (!collections.length) {
     return <CategoryMessage>No categories yet.</CategoryMessage>
   }
 
-  const rows: CategoryRow[] = [
-    { handle: undefined, label: "All products", count: data.total },
-    ...data.collections.map((collection) => ({ handle: collection.handle, label: collection.title, count: collection.count })),
-  ]
+  const rows: CategoryRow[] = [{ handle: undefined, label: "All products", count: total }, ...collections.map(({ handle, title, count }) => ({ handle, label: title, count }))]
 
   return (
     <ul className={LIST_CLASSES}>
-      {rows.map((row) => {
-        const isActive: boolean = row.handle === filters.collection
+      {rows.map(({ handle, label, count }) => {
+        const isActive: boolean = handle === filters.collection
         return (
-          <li key={row.handle ?? "all"} className="shrink-0">
-            <button type="button" aria-pressed={isActive} onClick={() => setCollection(row.handle)} className={categoryButton({ active: isActive })}>
-              <span className="whitespace-nowrap">{row.label}</span>
-              <span className={categoryCount({ active: isActive })}>{row.count}</span>
+          <li key={handle ?? "all"} className="shrink-0">
+            <button type="button" aria-pressed={isActive} onClick={() => setCollection(handle)} className={categoryButton({ active: isActive })}>
+              <span className="whitespace-nowrap">{label}</span>
+              <span className={categoryCount({ active: isActive })}>{count}</span>
             </button>
           </li>
         )

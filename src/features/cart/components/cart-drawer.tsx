@@ -3,14 +3,14 @@
 import { X } from "lucide-react"
 import { useEffect, useId, useRef } from "react"
 import type { CartLine } from "../cart.types"
-import { selectCartItemCount, selectCartItems, selectCartSubtotal } from "../store/cart.selectors"
+import { useCheckoutHref } from "../hooks/use-checkout-href"
+import { selectCartCurrencyCode, selectCartItemCount, selectCartItems, selectCartSubtotal } from "../store/cart.selectors"
 import { useCartStore } from "../store/cart.store"
 import { CartEmptyState } from "./cart-empty-state"
 import { CartLineItem } from "./cart-line-item"
 import { CartSummary } from "./cart-summary"
 
 const SCROLL_LOCK_CLASS: string = "overflow-hidden"
-const FALLBACK_CURRENCY_CODE: string = "ILS"
 
 export const CartDrawer = (): React.JSX.Element => {
   const dialogRef = useRef<HTMLDialogElement>(null)
@@ -18,9 +18,10 @@ export const CartDrawer = (): React.JSX.Element => {
   const lines: CartLine[] = useCartStore(selectCartItems)
   const itemCount: number = useCartStore(selectCartItemCount)
   const subtotal: number = useCartStore(selectCartSubtotal)
+  const currencyCode: string = useCartStore(selectCartCurrencyCode)
   const closeCart: () => void = useCartStore((state) => state.closeCart)
+  const checkoutHref: string = useCheckoutHref()
   const itemCountLabel: string = itemCount === 1 ? "1 item" : `${itemCount} items`
-  const currencyCode: string = lines[0]?.currencyCode ?? FALLBACK_CURRENCY_CODE
 
   // Same approach as QuickViewDialog: showModal gives the backdrop, Esc and focus trapping; the page must not scroll underneath.
   useEffect(() => {
@@ -71,7 +72,7 @@ export const CartDrawer = (): React.JSX.Element => {
               <CartLineItem key={line.variantId} line={line} index={index} />
             ))}
           </ul>
-          <CartSummary subtotal={subtotal} currencyCode={currencyCode} onContinueShopping={closeDrawer} />
+          <CartSummary subtotal={subtotal} currencyCode={currencyCode} checkoutHref={checkoutHref} onCheckout={closeDrawer} onContinueShopping={closeDrawer} />
         </>
       ) : (
         <CartEmptyState onStartShopping={closeDrawer} />

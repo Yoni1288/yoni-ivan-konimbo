@@ -39,36 +39,41 @@ type VariantRow = ProductRow["variants"][number]
 const hasCollection = { collectionId: { not: null } } satisfies Prisma.ProductWhereInput
 
 const toProductOption = (option: OptionRow): ProductOption => {
-  return { id: option.id, title: option.title, values: option.values.map((optionValue) => optionValue.value) }
+  const { id, title, values } = option
+  return { id, title, values: values.map((optionValue) => optionValue.value) }
 }
 
 const toProductVariant = (variant: VariantRow): ProductVariant => {
+  const { id, title, sku, prices, inventoryQuantity } = variant
+
   return {
-    id: variant.id,
-    title: variant.title,
-    sku: variant.sku,
-    prices: variant.prices.map((price) => ({ amount: price.amount, currency_code: price.currencyCode })),
-    inventory_quantity: variant.inventoryQuantity,
+    id,
+    title,
+    sku,
+    prices: prices.map((price) => ({ amount: price.amount, currency_code: price.currencyCode })),
+    inventory_quantity: inventoryQuantity,
   }
 }
 
 const toProduct = (row: ProductRow): Product => {
-  if (!row.collection) {
-    throw new Error(`Product ${row.id} has no collection`)
+  const { id, title, handle, description, thumbnail, images, variants, options, tags, collection, createdAt } = row
+
+  if (!collection) {
+    throw new Error(`Product ${id} has no collection`)
   }
 
   return {
-    id: row.id,
-    title: row.title,
-    handle: row.handle,
-    description: row.description ?? "",
-    thumbnail: row.thumbnail ?? "",
-    images: row.images,
-    variants: row.variants.map(toProductVariant),
-    options: row.options.map(toProductOption),
-    tags: row.tags.map((productTag) => productTag.tag),
-    collection: row.collection,
-    created_at: row.createdAt.toISOString(),
+    id,
+    title,
+    handle,
+    description: description ?? "",
+    thumbnail: thumbnail ?? "",
+    images,
+    variants: variants.map(toProductVariant),
+    options: options.map(toProductOption),
+    tags: tags.map((productTag) => productTag.tag),
+    collection,
+    created_at: createdAt.toISOString(),
   }
 }
 
@@ -86,38 +91,40 @@ const escapeLikeWildcards = (text: string): string => {
 }
 
 const buildProductWhere = (query: ProductListQuery): Prisma.ProductWhereInput => {
+  const { q, collection, tag, min_price, max_price } = query
   const conditions: Prisma.ProductWhereInput[] = [hasCollection]
 
-  if (query.q) {
-    const searchText: string = escapeLikeWildcards(query.q)
+  if (q) {
+    const searchText: string = escapeLikeWildcards(q)
     conditions.push({
       OR: [{ title: { contains: searchText, mode: "insensitive" } }, { description: { contains: searchText, mode: "insensitive" } }],
     })
   }
 
-  if (query.collection) {
-    conditions.push({ collection: { handle: query.collection } })
+  if (collection) {
+    conditions.push({ collection: { handle: collection } })
   }
 
-  if (query.tag) {
-    conditions.push({ tags: { some: { tag: { value: query.tag } } } })
+  if (tag) {
+    conditions.push({ tags: { some: { tag: { value: tag } } } })
   }
 
-  if (query.min_price !== undefined || query.max_price !== undefined) {
-    conditions.push({ minPrice: { gte: query.min_price, lte: query.max_price } })
+  if (min_price !== undefined || max_price !== undefined) {
+    conditions.push({ minPrice: { gte: min_price, lte: max_price } })
   }
 
   return { AND: conditions }
 }
 
 export const findProducts = async (query: ProductListQuery): Promise<ProductsResponse> => {
+  const { sort, limit, offset } = query
   const where: Prisma.ProductWhereInput = buildProductWhere(query)
   const [count, rows] = await prisma.$transaction([
     prisma.product.count({ where }),
-    prisma.product.findMany({ where, select: productSelect, orderBy: PRODUCT_ORDER_BY[query.sort], take: query.limit, skip: query.offset }),
+    prisma.product.findMany({ where, select: productSelect, orderBy: PRODUCT_ORDER_BY[sort], take: limit, skip: offset }),
   ])
 
-  return { products: rows.map(toProduct), count, limit: query.limit, offset: query.offset }
+  return { products: rows.map(toProduct), count, limit, offset }
 }
 
 export const findProductById = async (id: string): Promise<Product | null> => {
