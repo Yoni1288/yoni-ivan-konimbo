@@ -1,0 +1,8 @@
+# Must never be modified (see CLAUDE.md)
+mock-data/
+src/types/product.ts
+
+.next/
+node_modules/
+pnpm-lock.yaml
+src/generated/

@@ -1,0 +1,48 @@
+import { z } from "zod"
+import type { Product, ProductsResponse } from "@/types/product"
+
+const priceSchema = z.object({
+  amount: z.number(),
+  currency_code: z.string(),
+})
+
+const productVariantSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  sku: z.string(),
+  prices: z.array(priceSchema),
+  inventory_quantity: z.number(),
+})
+
+export const productSchema: z.ZodType<Product> = z.object({
+  id: z.string(),
+  title: z.string(),
+  handle: z.string(),
+  description: z.string(),
+  thumbnail: z.string(),
+  images: z.array(z.object({ url: z.string() })),
+  variants: z.array(productVariantSchema),
+  options: z.array(z.object({ id: z.string(), title: z.string(), values: z.array(z.string()) })),
+  tags: z.array(z.object({ value: z.string() })),
+  collection: z.object({ id: z.string(), title: z.string(), handle: z.string() }),
+  created_at: z.string(),
+})
+
+export const productListQuerySchema = z.object({
+  q: z.string().trim().min(1).optional(),
+  collection: z.string().optional(),
+  tag: z.string().optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(12),
+  offset: z.coerce.number().int().min(0).default(0),
+})
+
+export const productIdParamsSchema = z.object({
+  id: z.string().min(1),
+})
+
+export const productsResponseSchema: z.ZodType<ProductsResponse> = z.object({
+  products: z.array(productSchema),
+  count: z.number(),
+  limit: z.number(),
+  offset: z.number(),
+})

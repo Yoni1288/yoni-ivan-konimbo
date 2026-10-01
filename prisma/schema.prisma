@@ -1,0 +1,25 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Nested fields are JSON so each row maps one to one onto the Product type in src/types/product.ts.
+model Product {
+  id          String   @id
+  title       String
+  handle      String   @unique
+  description String
+  thumbnail   String
+  images      Json
+  variants    Json
+  options     Json
+  tags        Json
+  collection  Json
+  createdAt   DateTime @map("created_at") @db.Timestamptz
+
+  @@map("products")
+}
