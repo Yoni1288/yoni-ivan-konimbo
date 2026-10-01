@@ -24,6 +24,8 @@ model Product {
   thumbnail    String?
   collectionId String?         @map("collection_id")
   createdAt    DateTime        @default(now()) @map("created_at") @db.Timestamptz
+  // Cheapest variant price (minor units). Prisma can't order by MIN() over a relation, so the seed stores it for sorting by price.
+  minPrice     Int             @map("min_price")
   collection   Collection?     @relation(fields: [collectionId], references: [id], onDelete: NoAction)
   images       ProductImage[]
   tags         ProductTag[]

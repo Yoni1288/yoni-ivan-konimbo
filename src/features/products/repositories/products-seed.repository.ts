@@ -1,5 +1,6 @@
 import type { Prisma, PrismaClient } from "@/generated/prisma/client"
 import type { Product, ProductOption, ProductVariant } from "@/types/product"
+import { getLowestPrice } from "../utils/product-display"
 
 const REPLACE_TIMEOUT_MS: number = 30_000
 
@@ -11,6 +12,7 @@ const toProductCreateInput = (product: Product): Prisma.ProductCreateInput => {
     description: product.description,
     thumbnail: product.thumbnail,
     createdAt: new Date(product.created_at),
+    minPrice: getLowestPrice(product)?.amount ?? 0,
     collection: { connectOrCreate: { where: { id: product.collection.id }, create: product.collection } },
     images: { create: product.images.map((image, index) => ({ url: image.url, position: index })) },
     tags: { create: product.tags.map((tag) => ({ tag: { connectOrCreate: { where: { value: tag.value }, create: { value: tag.value } } } })) },

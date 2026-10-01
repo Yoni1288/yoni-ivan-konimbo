@@ -1,7 +1,7 @@
 import type { Prisma } from "@/generated/prisma/client"
 import { prisma } from "@/shared/db/prisma"
 import type { Product, ProductOption, ProductsResponse, ProductVariant } from "@/types/product"
-import type { ProductListQuery } from "../products.types"
+import type { ProductListQuery, ProductSort } from "../products.types"
 
 const productSelect = {
   id: true,
@@ -72,6 +72,14 @@ const toProduct = (row: ProductRow): Product => {
   }
 }
 
+// id breaks ties so products with the same price or date keep a stable order across pages.
+const PRODUCT_ORDER_BY: Record<ProductSort, Prisma.ProductOrderByWithRelationInput[]> = {
+  featured: [{ id: "asc" }],
+  price_asc: [{ minPrice: "asc" }, { id: "asc" }],
+  price_desc: [{ minPrice: "desc" }, { id: "asc" }],
+  newest: [{ createdAt: "desc" }, { id: "asc" }],
+}
+
 // Prisma's `contains` becomes ILIKE without escaping, so `%` and `_` in the search text would act as wildcards.
 const escapeLikeWildcards = (text: string): string => {
   return text.replace(/[\\%_]/g, "\\$&")
@@ -95,6 +103,10 @@ const buildProductWhere = (query: ProductListQuery): Prisma.ProductWhereInput =>
     conditions.push({ tags: { some: { tag: { value: query.tag } } } })
   }
 
+  if (query.min_price !== undefined || query.max_price !== undefined) {
+    conditions.push({ minPrice: { gte: query.min_price, lte: query.max_price } })
+  }
+
   return { AND: conditions }
 }
 
@@ -102,7 +114,7 @@ export const findProducts = async (query: ProductListQuery): Promise<ProductsRes
   const where: Prisma.ProductWhereInput = buildProductWhere(query)
   const [count, rows] = await prisma.$transaction([
     prisma.product.count({ where }),
-    prisma.product.findMany({ where, select: productSelect, orderBy: { id: "asc" }, take: query.limit, skip: query.offset }),
+    prisma.product.findMany({ where, select: productSelect, orderBy: PRODUCT_ORDER_BY[query.sort], take: query.limit, skip: query.offset }),
   ])
 
   return { products: rows.map(toProduct), count, limit: query.limit, offset: query.offset }

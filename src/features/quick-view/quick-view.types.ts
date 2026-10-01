@@ -35,10 +35,13 @@ export type QuantityStepperProps = {
 export type QuickViewDetailsProps = {
   product: Product
   titleId: string
+  onAddedToCart: () => void
 }
 
 export type OptionValueState = "selected" | "available" | "unavailable"
 
 export type AddToCartBarProps = {
+  product: Product
   variant: ProductVariant | null
+  onAdded: () => void
 }

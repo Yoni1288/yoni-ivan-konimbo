@@ -28,13 +28,26 @@ export const productSchema: z.ZodType<Product> = z.object({
   created_at: z.string(),
 })
 
-export const productListQuerySchema = z.object({
-  q: z.string().trim().min(1).optional(),
-  collection: z.string().optional(),
-  tag: z.string().optional(),
-  limit: z.coerce.number().int().min(1).max(100).default(12),
-  offset: z.coerce.number().int().min(0).default(0),
-})
+export const productSortSchema = z.enum(["featured", "price_asc", "price_desc", "newest"])
+
+const priceAmountSchema = z.coerce.number().int().min(0)
+
+// min_price and max_price are in minor units, like every amount the API returns, and match a product's lowest variant price.
+export const productListQuerySchema = z
+  .object({
+    q: z.string().trim().min(1).optional(),
+    collection: z.string().optional(),
+    tag: z.string().optional(),
+    limit: z.coerce.number().int().min(1).max(100).default(12),
+    offset: z.coerce.number().int().min(0).default(0),
+    sort: productSortSchema.default("featured"),
+    min_price: priceAmountSchema.optional(),
+    max_price: priceAmountSchema.optional(),
+  })
+  .refine((query) => query.min_price === undefined || query.max_price === undefined || query.min_price <= query.max_price, {
+    message: "min_price must not be greater than max_price",
+    path: ["max_price"],
+  })
 
 export const productIdParamsSchema = z.object({
   id: z.string().min(1),
@@ -51,4 +64,19 @@ export const productsResponseSchema: z.ZodType<ProductsResponse> = z.object({
 export const productFiltersSchema = z.object({
   offset: z.coerce.number().int().min(0).catch(0),
   collection: z.string().min(1).optional().catch(undefined),
+  sort: productSortSchema.catch("featured"),
+  priceFrom: priceAmountSchema.optional().catch(undefined),
+  priceTo: priceAmountSchema.optional().catch(undefined),
+})
+
+const priceInputSchema = z
+  .string()
+  .trim()
+  .transform((value) => value || undefined)
+  .pipe(z.coerce.number<string>({ error: "Enter a whole number" }).int("Enter a whole number").min(0, "Enter 0 or more").optional())
+
+// The sidebar inputs are whole shekels, like the prices shown on the cards.
+export const priceRangeFormSchema = z.object({ from: priceInputSchema, to: priceInputSchema }).refine((range) => range.from === undefined || range.to === undefined || range.from <= range.to, {
+  message: "“From” must not be more than “To”",
+  path: ["to"],
 })

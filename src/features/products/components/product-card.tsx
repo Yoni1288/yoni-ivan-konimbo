@@ -3,11 +3,10 @@ import { Eye } from "lucide-react"
 import Image from "next/image"
 import { cn } from "@/shared/utils/cn"
 import { formatPrice } from "@/shared/utils/format-price"
+import { getTileClass } from "@/shared/utils/tile-class"
 import type { Price } from "@/types/product"
 import type { BadgeStockStatus, ColorSwatch, ProductCardProps, StockStatus } from "../products.types"
 import { getColorSwatches, getLowestPrice, getStockStatus } from "../utils/product-display"
-
-const TILE_CLASSES: string[] = ["bg-tile-1", "bg-tile-2", "bg-tile-3", "bg-tile-4", "bg-tile-5", "bg-tile-6"]
 
 const stockBadge = cva("absolute top-3 left-3 rounded-full px-2.5 py-1 text-2xs font-medium", {
   variants: {
@@ -51,7 +50,7 @@ export const ProductCard = ({ product, index, onQuickView }: ProductCardProps): 
   const lowestPrice: Price | null = getLowestPrice(product)
   const stockStatus: StockStatus = getStockStatus(product)
   const swatches: ColorSwatch[] = getColorSwatches(product)
-  const tileClass: string = TILE_CLASSES[index % TILE_CLASSES.length]
+  const tileClass: string = getTileClass(index)
 
   return (
     <article>

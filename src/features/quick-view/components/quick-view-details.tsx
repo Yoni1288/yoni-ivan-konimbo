@@ -8,7 +8,7 @@ import { AddToCartBar } from "./add-to-cart-bar"
 import { OptionPicker } from "./option-picker"
 import { StockPill } from "./stock-pill"
 
-export const QuickViewDetails = ({ product, titleId }: QuickViewDetailsProps): React.JSX.Element => {
+export const QuickViewDetails = ({ product, titleId, onAddedToCart }: QuickViewDetailsProps): React.JSX.Element => {
   const { selectedOptions, selectedVariant, selectOption, isValueAvailable } = useVariantSelection(product)
   const price: Price | undefined = selectedVariant?.prices[0]
 
@@ -41,7 +41,7 @@ export const QuickViewDetails = ({ product, titleId }: QuickViewDetailsProps): R
       {selectedVariant && <p className="mt-4 text-xs text-muted">SKU {selectedVariant.sku}</p>}
 
       <div className="mt-8 md:mt-auto md:pt-8">
-        <AddToCartBar key={selectedVariant?.id ?? "none"} variant={selectedVariant} />
+        <AddToCartBar key={selectedVariant?.id ?? "none"} product={product} variant={selectedVariant} onAdded={onAddedToCart} />
       </div>
     </div>
   )

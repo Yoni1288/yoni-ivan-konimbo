@@ -1,11 +1,10 @@
 "use client"
 
-import { ChevronDown, Search } from "lucide-react"
+import { Search } from "lucide-react"
 import { Suspense } from "react"
 import { useProductFilters } from "../hooks/use-product-filters"
 import { useProductsQuery } from "../hooks/use-products-query"
-
-const SORT_OPTIONS: string[] = ["Featured", "Price: low to high", "Price: high to low", "Newest"]
+import { SortSelect, SortSelectFallback } from "./sort-select"
 
 const ProductCount = (): React.JSX.Element | null => {
   const { filters } = useProductFilters()
@@ -31,17 +30,9 @@ export const CatalogToolbar = (): React.JSX.Element => {
         <Suspense fallback={null}>
           <ProductCount />
         </Suspense>
-        <label className="flex items-center gap-2 text-xs text-muted">
-          Sort by
-          <span className="relative">
-            <select className="h-11 appearance-none rounded-lg border border-line bg-white pr-9 pl-3 text-sm text-ink outline-none focus:border-ink">
-              {SORT_OPTIONS.map((option) => (
-                <option key={option}>{option}</option>
-              ))}
-            </select>
-            <ChevronDown className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-ink" strokeWidth={1.5} />
-          </span>
-        </label>
+        <Suspense fallback={<SortSelectFallback />}>
+          <SortSelect />
+        </Suspense>
       </div>
     </div>
   )

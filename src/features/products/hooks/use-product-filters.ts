@@ -1,7 +1,15 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { startTransition } from "react"
 import { productFiltersSchema } from "../products.schemas"
-import type { ProductFilters, ProductFiltersState } from "../products.types"
+import type { PriceRange, ProductFilters, ProductFiltersState, ProductSort } from "../products.types"
+
+const setOptionalParam = (params: URLSearchParams, name: string, value: number | undefined): void => {
+  if (value === undefined) {
+    params.delete(name)
+  } else {
+    params.set(name, String(value))
+  }
+}
 
 const buildUrl = (pathname: string, params: URLSearchParams): string => {
   const query: string = params.toString()
@@ -15,6 +23,9 @@ export const useProductFilters = (): ProductFiltersState => {
   const filters: ProductFilters = productFiltersSchema.parse({
     offset: searchParams.get("offset") ?? undefined,
     collection: searchParams.get("collection") ?? undefined,
+    sort: searchParams.get("sort") ?? undefined,
+    priceFrom: searchParams.get("price_from") ?? undefined,
+    priceTo: searchParams.get("price_to") ?? undefined,
   })
 
   const setOffset = (offset: number): void => {
@@ -43,5 +54,28 @@ export const useProductFilters = (): ProductFiltersState => {
     startTransition(() => router.replace(buildUrl(pathname, params)))
   }
 
-  return { filters, setOffset, setCollection }
+  // A new order changes what is on every page, so it also starts from the first page.
+  const setSort = (sort: ProductSort): void => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete("offset")
+
+    if (sort === "featured") {
+      params.delete("sort")
+    } else {
+      params.set("sort", sort)
+    }
+
+    startTransition(() => router.replace(buildUrl(pathname, params)))
+  }
+
+  const setPriceRange = (range: PriceRange): void => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete("offset")
+    setOptionalParam(params, "price_from", range.from)
+    setOptionalParam(params, "price_to", range.to)
+
+    startTransition(() => router.replace(buildUrl(pathname, params)))
+  }
+
+  return { filters, setOffset, setCollection, setSort, setPriceRange }
 }

@@ -2,6 +2,7 @@
 
 import { X } from "lucide-react"
 import { useEffect, useId, useRef } from "react"
+import { useCartStore } from "@/features/cart/store/cart.store"
 import type { QuickViewDialogProps } from "../quick-view.types"
 import { ProductGallery } from "./product-gallery"
 import { QuickViewDetails } from "./quick-view-details"
@@ -11,6 +12,7 @@ const SCROLL_LOCK_CLASS: string = "overflow-hidden"
 export const QuickViewDialog = ({ product, onClose }: QuickViewDialogProps): React.JSX.Element => {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const titleId: string = useId()
+  const openCart: () => void = useCartStore((state) => state.openCart)
 
   // showModal gives the native backdrop, Esc handling and focus management; the page itself must stop scrolling underneath.
   useEffect(() => {
@@ -24,6 +26,11 @@ export const QuickViewDialog = ({ product, onClose }: QuickViewDialogProps): Rea
   const closeDialog = (): void => {
     dialogRef.current?.close()
     onClose()
+  }
+
+  const showCart = (): void => {
+    closeDialog()
+    openCart()
   }
 
   const handleCancel = (event: React.SyntheticEvent<HTMLDialogElement>): void => {
@@ -58,7 +65,7 @@ export const QuickViewDialog = ({ product, onClose }: QuickViewDialogProps): Rea
               <X className="size-5" strokeWidth={1.5} />
             </button>
           </div>
-          <QuickViewDetails product={product} titleId={titleId} />
+          <QuickViewDetails product={product} titleId={titleId} onAddedToCart={showCart} />
         </div>
       </div>
     </dialog>
