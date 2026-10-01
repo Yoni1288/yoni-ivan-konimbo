@@ -23,3 +23,15 @@ Products were first stored as one `products` table with JSON columns. They now l
   - `--grid-template-columns-sidebar` / `-pagination`
   - `--color-swatch-*`: swatch colors moved from inline `style` hex values to tokens.
 - **Cart badge.** It used `text-[10px]`; it now uses `text-2xs` (11px) rather than adding a one-off token.
+
+## Redis
+
+- Redis 7 runs as a `redis` service in `docker-compose.yml` with a `redis-cli ping` healthcheck and a named volume (`redis_data`, append-only file on). The app container waits for it to be healthy and reaches it at `redis://redis:6379`; on the host it's `REDIS_URL=redis://localhost:6379` from `.env`.
+- Client: `ioredis`, because it has built-in reconnects, TypeScript types and lazy connect. A single instance is exported from `src/shared/cache/redis.ts` and cached on `globalThis` in dev, the same way as the Prisma client. `lazyConnect` means `next build` and tests don't open a connection unless a command runs.
+
+## Environment variables
+
+- Server env is one Zod schema in `src/shared/config/env.server.ts`, parsed at import time. A missing or malformed `DATABASE_URL` / `REDIS_URL` fails at startup with a clear error instead of at the first query. `import "server-only"` makes a client-component import a build error.
+- No env library such as `@t3-oss/env-nextjs`: we only have server variables, and a ten-line Zod module does the same job without another dependency. `server-only` is the only package added.
+- `prisma.config.ts` and `prisma/seed.ts` run outside Next.js, so they read `process.env` directly. The seed builds its own `PrismaClient` and passes it to `replaceAllProducts`, because the shared client depends on the server-only env module.
+- Tests use Redis database 1 (`redis://localhost:6379/1`) from `.env.test`, so they never touch dev keys in database 0.

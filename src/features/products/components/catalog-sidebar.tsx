@@ -1,60 +1,7 @@
-import { cva } from "class-variance-authority"
-
-type SidebarCategory = {
-  label: string
-  count: number
-}
-
-// Static placeholder copied from the design; filtering is not wired up yet.
-const CATEGORIES: SidebarCategory[] = [
-  { label: "All products", count: 12 },
-  { label: "Audio", count: 2 },
-  { label: "Workspace", count: 3 },
-  { label: "Home", count: 3 },
-  { label: "Travel", count: 1 },
-  { label: "Fitness", count: 3 },
-]
-
-const ACTIVE_CATEGORY: string = "All products"
-
-const categoryButton = cva("flex h-11 w-full items-center justify-between gap-4 rounded-lg px-3 text-sm", {
-  variants: {
-    active: {
-      true: "bg-ink text-white",
-      false: "hover:bg-black/5",
-    },
-  },
-})
-
-const categoryCount = cva("text-xs", {
-  variants: {
-    active: {
-      true: "text-white/80",
-      false: "text-muted",
-    },
-  },
-})
+import { CategoryList } from "@/features/categories/components/category-list"
 
 const SidebarHeading = ({ children }: { children: React.ReactNode }): React.JSX.Element => {
   return <h2 className="text-2xs font-medium tracking-widest text-muted uppercase">{children}</h2>
-}
-
-const CategoryList = (): React.JSX.Element => {
-  return (
-    <ul className="mt-3 flex flex-wrap gap-2 lg:flex-col lg:gap-1">
-      {CATEGORIES.map((category) => {
-        const isActive: boolean = category.label === ACTIVE_CATEGORY
-        return (
-          <li key={category.label} className="shrink-0">
-            <button type="button" aria-pressed={isActive} className={categoryButton({ active: isActive })}>
-              <span className="whitespace-nowrap">{category.label}</span>
-              <span className={categoryCount({ active: isActive })}>{category.count}</span>
-            </button>
-          </li>
-        )
-      })}
-    </ul>
-  )
 }
 
 const PriceRange = (): React.JSX.Element => {

@@ -119,6 +119,8 @@ src/
   shared/
     components/
     api/
+    config/
+      env.server.ts         # typed, validated server env (server-only)
     db/
       prisma.ts             # the single Prisma client instance
     errors/
@@ -402,6 +404,62 @@ const stockBadge = cva("rounded-full px-2.5 py-1 text-2xs font-medium", {
 <li style={{ backgroundColor: swatch.hex }} />
 ```
 
+## 17. Environment Variables
+
+### Typed, validated env
+
+- Never read `process.env` directly in app code. Import the typed `env` object instead.
+- Server env lives in `src/shared/config/env.server.ts`: a Zod schema parsed once at import time, so the app fails at startup with a clear error if a variable is missing or invalid. Derive the type with `z.infer`.
+- The file starts with `import "server-only"` so it can never be bundled into a client component. Install `server-only` as a dependency so TypeScript and Vitest can resolve it.
+- Client env (only if ever needed) lives in `src/shared/config/env.client.ts`. Browser variables must be prefixed `NEXT_PUBLIC_` and referenced literally (`process.env.NEXT_PUBLIC_X`), because Next.js only inlines literal references at build time.
+- Never put secrets in `NEXT_PUBLIC_` variables. They are shipped to the browser.
+- Every new variable is added to the Zod schema and to `.env.example` in the same change.
+- No env library (e.g. `@t3-oss/env-nextjs`). A small Zod module is enough; this is noted in `DECISIONS.md`.
+
+```ts
+// src/shared/config/env.server.ts
+import "server-only"
+import { z } from "zod"
+
+const serverEnvSchema = z.object({
+  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  DATABASE_URL: z.url(),
+})
+
+export type ServerEnv = z.infer<typeof serverEnvSchema>
+
+export const env: ServerEnv = serverEnvSchema.parse(process.env)
+```
+
+```ts
+// ✅
+import { env } from "@/shared/config/env.server"
+const adapter = new PrismaPg({ connectionString: env.DATABASE_URL })
+
+// ❌
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
+const apiUrl = process.env[`NEXT_PUBLIC_${name}`] // not inlined, undefined in the browser
+```
+
+### Files
+
+| File           | Committed                      | Contains                                                          |
+| -------------- | ------------------------------ | ----------------------------------------------------------------- |
+| `.env.example` | Yes                            | Placeholder values. The documentation of every variable.          |
+| `.env`         | No (gitignored)                | Local values. Read by Next.js, the Prisma CLI and Docker Compose. |
+| `.env.test`    | Only if it contains no secrets | The test database URL (section 12).                               |
+
+- Keep all local values in `.env`, not `.env.local`. Prisma and Docker Compose don't read `.env.local`.
+- Production secrets come from the hosting platform or a secrets manager, never from committed files.
+
+### Exceptions and tooling
+
+- Don't import `dotenv` in app code; Next.js 16 loads `.env` files itself. `dotenv/config` is imported only in `prisma.config.ts`.
+- `prisma.config.ts` and `prisma/seed.ts` run outside Next.js, so they read `process.env` directly. They must not import the `server-only` env module, directly or through another import (this includes `@/shared/db/prisma`). The seed creates its own `PrismaClient`.
+- `prisma.config.ts` reads `DATABASE_URL` leniently (`process.env.DATABASE_URL ?? ""`), not with Prisma's `env()` helper. `env()` throws when the variable is missing, which would break `prisma generate` in `postinstall` on a clean clone (section 10).
+- Vitest does not load `.env.test` automatically. Call `process.loadEnvFile(".env.test")` (built into Node 22+) at the top of `vitest.config.ts`, not in a `setupFiles` file. `setupFiles` runs after `globalSetup`, so the migrate and seed there would hit the dev database from `.env`.
+- `server-only` throws outside a React Server Component build, so `vitest.config.ts` aliases it to an empty module. Otherwise any route test that imports `env.server.ts` (e.g. through `@/shared/db/prisma`) fails.
+
 ---
 
 ## Database (Prisma + PostgreSQL)
@@ -418,7 +476,7 @@ const stockBadge = cva("rounded-full px-2.5 py-1 text-2xs font-medium", {
 
 - All database access goes through Prisma. Raw SQL is forbidden, including `$queryRawUnsafe` and `$executeRawUnsafe`.
 - If raw SQL is ever unavoidable, use the tagged `$queryRaw` template (it parameterizes values) and explain why in a comment.
-- One Prisma client instance, exported from `src/shared/db/prisma.ts`, cached on `globalThis` in development so hot reload doesn't open new connections.
+- One Prisma client instance in app code, exported from `src/shared/db/prisma.ts`, cached on `globalThis` in development so hot reload doesn't open new connections. `prisma/seed.ts` is the exception: it runs outside Next.js and creates its own client (section 17).
 - Prisma is only used in server code (route handlers, server components, repositories). Never import it in a client component.
 - Prisma calls live only in repository files (`src/features/<feature>/repositories/`). Route handlers and components call repository functions, never Prisma directly.
 - Repositories return types derived from Prisma (e.g. `Prisma.ProductGetPayload<...>`) or a mapped domain type. No hand-written duplicate row types.
@@ -428,18 +486,19 @@ const stockBadge = cva("rounded-full px-2.5 py-1 text-2xs font-medium", {
 // src/shared/db/prisma.ts
 import { PrismaPg } from "@prisma/adapter-pg"
 import { PrismaClient } from "@/generated/prisma/client"
+import { env } from "@/shared/config/env.server"
 
 const globalForPrisma = globalThis as typeof globalThis & { prisma?: PrismaClient }
 
 const createPrismaClient = (): PrismaClient => {
-  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
+  const adapter = new PrismaPg({ connectionString: env.DATABASE_URL })
   return new PrismaClient({ adapter })
 }
 
 export const prisma: PrismaClient = globalForPrisma.prisma ?? createPrismaClient()
 
 // Reuse one client across dev hot reloads instead of opening a new connection pool per reload.
-if (process.env.NODE_ENV !== "production") {
+if (env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma
 }
 ```

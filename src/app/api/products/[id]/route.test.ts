@@ -1,10 +1,10 @@
-import { NextRequest } from "next/server"
 import { describe, expect, it } from "vitest"
+import { createTestRequest } from "@/shared/testing/create-test-request"
 import type { ProductResponse } from "@/types/product"
 import { GET } from "./route"
 
 function requestProduct(id: string): Promise<Response> {
-  return GET(new NextRequest(`http://localhost/api/products/${id}`), { params: Promise.resolve({ id }) })
+  return GET(createTestRequest(`/api/products/${id}`), { params: Promise.resolve({ id }) })
 }
 
 describe("GET /api/products/:id", () => {

@@ -1,5 +1,4 @@
-import type { Prisma } from "@/generated/prisma/client"
-import { prisma } from "@/shared/db/prisma"
+import type { Prisma, PrismaClient } from "@/generated/prisma/client"
 import type { Product, ProductOption, ProductVariant } from "@/types/product"
 
 const REPLACE_TIMEOUT_MS: number = 30_000
@@ -56,8 +55,9 @@ const createProduct = async (tx: Prisma.TransactionClient, product: Product): Pr
   }
 }
 
-export const replaceAllProducts = async (products: Product[]): Promise<void> => {
-  await prisma.$transaction(
+// Takes the client as a parameter because the seed runs outside Next.js and can't import the shared client (it depends on the server-only env module).
+export const replaceAllProducts = async (client: PrismaClient, products: Product[]): Promise<void> => {
+  await client.$transaction(
     async (tx: Prisma.TransactionClient): Promise<void> => {
       await tx.product.deleteMany()
       await tx.tag.deleteMany()

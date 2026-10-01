@@ -1,11 +1,11 @@
-import { NextRequest } from "next/server"
 import { describe, expect, it } from "vitest"
+import { createTestRequest } from "@/shared/testing/create-test-request"
 import type { ProductsResponse } from "@/types/product"
 import { GET } from "./route"
 
 describe("GET /api/products", () => {
   it("returns a page of products from the database", async () => {
-    const response: Response = await GET(new NextRequest("http://localhost/api/products?limit=5"), undefined)
+    const response: Response = await GET(createTestRequest("/api/products?limit=5"), undefined)
     const body: ProductsResponse = await response.json()
 
     expect(response.status).toBe(200)
@@ -16,7 +16,7 @@ describe("GET /api/products", () => {
   })
 
   it("rejects an invalid limit", async () => {
-    const response: Response = await GET(new NextRequest("http://localhost/api/products?limit=abc"), undefined)
+    const response: Response = await GET(createTestRequest("/api/products?limit=abc"), undefined)
 
     expect(response.status).toBe(400)
   })

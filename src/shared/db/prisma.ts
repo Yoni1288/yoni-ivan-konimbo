@@ -1,16 +1,17 @@
 import { PrismaPg } from "@prisma/adapter-pg"
 import { PrismaClient } from "@/generated/prisma/client"
+import { env } from "@/shared/config/env.server"
 
 const globalForPrisma = globalThis as typeof globalThis & { prisma?: PrismaClient }
 
 const createPrismaClient = (): PrismaClient => {
-  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
+  const adapter = new PrismaPg({ connectionString: env.DATABASE_URL })
   return new PrismaClient({ adapter })
 }
 
 export const prisma: PrismaClient = globalForPrisma.prisma ?? createPrismaClient()
 
 // Reuse one client across dev hot reloads instead of opening a new connection pool per reload.
-if (process.env.NODE_ENV !== "production") {
+if (env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma
 }
