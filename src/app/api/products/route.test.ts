@@ -15,6 +15,15 @@ describe("GET /api/products", () => {
     expect(body.offset).toBe(0)
   })
 
+  it("returns only products in the requested collection", async () => {
+    const response: Response = await GET(createTestRequest("/api/products?collection=audio"), undefined)
+    const body: ProductsResponse = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(body.products.length).toBeGreaterThan(0)
+    expect(body.products.every((product) => product.collection.handle === "audio")).toBe(true)
+  })
+
   it("rejects an invalid limit", async () => {
     const response: Response = await GET(createTestRequest("/api/products?limit=abc"), undefined)
 

@@ -5,5 +5,10 @@ import type { ProductFilters } from "../products.types"
 
 export const fetchProducts = (filters: ProductFilters): Promise<ProductsResponse> => {
   const params = new URLSearchParams({ offset: String(filters.offset) })
+
+  if (filters.collection) {
+    params.set("collection", filters.collection)
+  }
+
   return apiGet(`/api/products?${params}`, productsResponseSchema)
 }

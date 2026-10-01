@@ -9,6 +9,7 @@ export type ProductFilters = z.infer<typeof productFiltersSchema>
 export type ProductFiltersState = {
   filters: ProductFilters
   setOffset: (offset: number) => void
+  setCollection: (collection: string | undefined) => void
 }
 
 export type ProductIdParams = z.infer<typeof productIdParamsSchema>

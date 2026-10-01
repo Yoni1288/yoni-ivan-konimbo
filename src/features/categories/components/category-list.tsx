@@ -1,19 +1,17 @@
 "use client"
 
 import { cva } from "class-variance-authority"
+import { useProductFilters } from "@/features/products/hooks/use-product-filters"
 import { useCategoriesQuery } from "../hooks/use-categories-query"
 
 type CategoryRow = {
-  key: string
+  handle: string | undefined
   label: string
   count: number
 }
 
 const SKELETON_COUNT: number = 6
 const LIST_CLASSES: string = "mt-3 flex flex-wrap gap-2 lg:flex-col lg:gap-1"
-
-// Filtering by collection is not wired up yet, so "All products" is always the active row.
-const ALL_PRODUCTS_KEY: string = "all"
 
 const categoryButton = cva("flex h-11 w-full items-center justify-between gap-4 rounded-lg px-3 text-sm", {
   variants: {
@@ -33,7 +31,7 @@ const categoryCount = cva("text-xs", {
   },
 })
 
-const CategoryListSkeleton = (): React.JSX.Element => {
+export const CategoryListSkeleton = (): React.JSX.Element => {
   return (
     <ul className={LIST_CLASSES} aria-busy="true" aria-label="Loading categories">
       {Array.from({ length: SKELETON_COUNT }, (_, index) => (
@@ -49,6 +47,7 @@ const CategoryMessage = ({ children }: { children: React.ReactNode }): React.JSX
 
 export const CategoryList = (): React.JSX.Element => {
   const { data, isPending, isError } = useCategoriesQuery()
+  const { filters, setCollection } = useProductFilters()
 
   if (isPending) {
     return <CategoryListSkeleton />
@@ -63,17 +62,17 @@ export const CategoryList = (): React.JSX.Element => {
   }
 
   const rows: CategoryRow[] = [
-    { key: ALL_PRODUCTS_KEY, label: "All products", count: data.total },
-    ...data.collections.map((collection) => ({ key: collection.id, label: collection.title, count: collection.count })),
+    { handle: undefined, label: "All products", count: data.total },
+    ...data.collections.map((collection) => ({ handle: collection.handle, label: collection.title, count: collection.count })),
   ]
 
   return (
     <ul className={LIST_CLASSES}>
       {rows.map((row) => {
-        const isActive: boolean = row.key === ALL_PRODUCTS_KEY
+        const isActive: boolean = row.handle === filters.collection
         return (
-          <li key={row.key} className="shrink-0">
-            <button type="button" aria-pressed={isActive} className={categoryButton({ active: isActive })}>
+          <li key={row.handle ?? "all"} className="shrink-0">
+            <button type="button" aria-pressed={isActive} onClick={() => setCollection(row.handle)} className={categoryButton({ active: isActive })}>
               <span className="whitespace-nowrap">{row.label}</span>
               <span className={categoryCount({ active: isActive })}>{row.count}</span>
             </button>

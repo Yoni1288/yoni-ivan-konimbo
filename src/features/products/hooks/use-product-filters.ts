@@ -12,7 +12,10 @@ export const useProductFilters = (): ProductFiltersState => {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname: string = usePathname()
-  const filters: ProductFilters = productFiltersSchema.parse({ offset: searchParams.get("offset") ?? undefined })
+  const filters: ProductFilters = productFiltersSchema.parse({
+    offset: searchParams.get("offset") ?? undefined,
+    collection: searchParams.get("collection") ?? undefined,
+  })
 
   const setOffset = (offset: number): void => {
     const params = new URLSearchParams(searchParams.toString())
@@ -26,5 +29,19 @@ export const useProductFilters = (): ProductFiltersState => {
     startTransition(() => router.replace(buildUrl(pathname, params)))
   }
 
-  return { filters, setOffset }
+  // Changing the category starts from the first page, since the old offset may be past the new result count.
+  const setCollection = (collection: string | undefined): void => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete("offset")
+
+    if (collection) {
+      params.set("collection", collection)
+    } else {
+      params.delete("collection")
+    }
+
+    startTransition(() => router.replace(buildUrl(pathname, params)))
+  }
+
+  return { filters, setOffset, setCollection }
 }

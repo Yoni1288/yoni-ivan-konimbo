@@ -1,4 +1,5 @@
-import { CategoryList } from "@/features/categories/components/category-list"
+import { Suspense } from "react"
+import { CategoryList, CategoryListSkeleton } from "@/features/categories/components/category-list"
 
 const SidebarHeading = ({ children }: { children: React.ReactNode }): React.JSX.Element => {
   return <h2 className="text-2xs font-medium tracking-widest text-muted uppercase">{children}</h2>
@@ -26,7 +27,9 @@ export const CatalogSidebar = (): React.JSX.Element => {
     <aside className="flex min-w-0 flex-col gap-6">
       <section>
         <SidebarHeading>Category</SidebarHeading>
-        <CategoryList />
+        <Suspense fallback={<CategoryListSkeleton />}>
+          <CategoryList />
+        </Suspense>
       </section>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-1">
         <section>
