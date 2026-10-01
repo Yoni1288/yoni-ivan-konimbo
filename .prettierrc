@@ -1,5 +1,8 @@
 {
   "printWidth": 200,
   "semi": false,
-  "trailingComma": "es5"
+  "trailingComma": "es5",
+  "plugins": ["prettier-plugin-tailwindcss"],
+  "tailwindStylesheet": "./src/app/globals.css",
+  "tailwindFunctions": ["cn", "cva"]
 }

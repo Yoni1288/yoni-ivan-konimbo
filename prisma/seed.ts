@@ -1,14 +1,14 @@
 import { z } from "zod"
 import { productSchema } from "../src/features/products/products.schemas"
-import { insertMissingProducts } from "../src/features/products/repositories/products.repository"
+import { replaceAllProducts } from "../src/features/products/repositories/products-seed.repository"
 import { prisma } from "../src/shared/db/prisma"
 import productsData from "../mock-data/products.json"
 
-// Inserts only products that don't exist yet, so seeding is safe to rerun (Docker runs it on every app start).
-async function seedProducts(): Promise<void> {
+// Replaces all catalog data in one transaction, so seeding is safe to rerun (Docker runs it on every app start).
+const seedProducts = async (): Promise<void> => {
   const products = z.array(productSchema).parse(productsData)
-  const insertedCount: number = await insertMissingProducts(products)
-  console.log(`Seeded ${insertedCount} new products (${products.length} in mock data).`)
+  await replaceAllProducts(products)
+  console.log(`Seeded ${products.length} products.`)
 }
 
 seedProducts().finally(() => prisma.$disconnect())

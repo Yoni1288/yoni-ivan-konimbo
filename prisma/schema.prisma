@@ -7,19 +7,114 @@ datasource db {
   provider = "postgresql"
 }
 
-// Nested fields are JSON so each row maps one to one onto the Product type in src/types/product.ts.
+model Collection {
+  id       String    @id
+  title    String
+  handle   String    @unique
+  products Product[]
+
+  @@map("collections")
+}
+
 model Product {
-  id          String   @id
-  title       String
-  handle      String   @unique
-  description String
-  thumbnail   String
-  images      Json
-  variants    Json
-  options     Json
-  tags        Json
-  collection  Json
-  createdAt   DateTime @map("created_at") @db.Timestamptz
+  id           String          @id
+  title        String
+  handle       String          @unique
+  description  String?
+  thumbnail    String?
+  collectionId String?         @map("collection_id")
+  createdAt    DateTime        @default(now()) @map("created_at") @db.Timestamptz
+  collection   Collection?     @relation(fields: [collectionId], references: [id], onDelete: NoAction)
+  images       ProductImage[]
+  tags         ProductTag[]
+  options      ProductOption[]
+  variants     Variant[]
 
   @@map("products")
+}
+
+model ProductImage {
+  id        Int     @id @default(autoincrement())
+  productId String  @map("product_id")
+  url       String
+  position  Int     @default(0)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_images")
+}
+
+model Tag {
+  id       Int          @id @default(autoincrement())
+  value    String       @unique
+  products ProductTag[]
+
+  @@map("tags")
+}
+
+model ProductTag {
+  productId String  @map("product_id")
+  tagId     Int     @map("tag_id")
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([productId, tagId])
+  @@map("product_tags")
+}
+
+model ProductOption {
+  id        String               @id
+  productId String               @map("product_id")
+  title     String
+  // Not in the original design: variant titles list option values in this order, so it must be stored.
+  position  Int                  @default(0)
+  product   Product              @relation(fields: [productId], references: [id], onDelete: Cascade)
+  values    ProductOptionValue[]
+
+  @@map("product_options")
+}
+
+model ProductOptionValue {
+  id       Int                  @id @default(autoincrement())
+  optionId String               @map("option_id")
+  value    String
+  option   ProductOption        @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  variants VariantOptionValue[]
+
+  @@unique([optionId, value])
+  @@map("product_option_values")
+}
+
+model Variant {
+  id                String               @id
+  productId         String               @map("product_id")
+  title             String
+  sku               String               @unique
+  inventoryQuantity Int                  @default(0) @map("inventory_quantity")
+  product           Product              @relation(fields: [productId], references: [id], onDelete: Cascade)
+  optionValues      VariantOptionValue[]
+  prices            VariantPrice[]
+
+  @@map("variants")
+}
+
+model VariantOptionValue {
+  variantId     String             @map("variant_id")
+  optionValueId Int                @map("option_value_id")
+  variant       Variant            @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  optionValue   ProductOptionValue @relation(fields: [optionValueId], references: [id], onDelete: Cascade)
+
+  @@id([variantId, optionValueId])
+  @@map("variant_option_values")
+}
+
+model VariantPrice {
+  id           Int     @id @default(autoincrement())
+  variantId    String  @map("variant_id")
+  // Minor units (agorot): 29900 means 299.00.
+  amount       Int
+  currencyCode String  @map("currency_code") @db.Char(3)
+  variant      Variant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@unique([variantId, currencyCode])
+  @@map("variant_prices")
 }

@@ -5,12 +5,12 @@ import { sendError } from "./send-error"
 
 type RouteHandler<TContext> = (request: Request, context: TContext) => Promise<Response>
 
-function errorResponse(statusCode: number, message: string): Response {
+const errorResponse = (statusCode: number, message: string): Response => {
   const body: ErrorResponseBody = { statusCode, message }
   return Response.json(body, { status: statusCode })
 }
 
-function toKnownHttpError(error: unknown): HttpError | null {
+const toKnownHttpError = (error: unknown): HttpError | null => {
   if (error instanceof HttpError) {
     return error
   }
@@ -18,7 +18,7 @@ function toKnownHttpError(error: unknown): HttpError | null {
   return toHttpErrorFromPrisma(error)
 }
 
-export function withErrorHandling<TContext>(handler: RouteHandler<TContext>): RouteHandler<TContext> {
+export const withErrorHandling = <TContext>(handler: RouteHandler<TContext>): RouteHandler<TContext> => {
   return async (request: Request, context: TContext): Promise<Response> => {
     try {
       return await handler(request, context)

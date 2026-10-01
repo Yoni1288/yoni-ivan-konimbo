@@ -6,7 +6,7 @@ const KNOWN_PRISMA_ERRORS: Record<string, HttpError> = {
   P2002: new HttpError(409, "Already exists"),
 }
 
-export function toHttpErrorFromPrisma(error: unknown): HttpError | null {
+export const toHttpErrorFromPrisma = (error: unknown): HttpError | null => {
   if (!(error instanceof Prisma.PrismaClientKnownRequestError)) {
     return null
   }

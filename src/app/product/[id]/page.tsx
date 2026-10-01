@@ -1,4 +1,4 @@
-export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
+const ProductPage = async ({ params }: { params: Promise<{ id: string }> }): Promise<React.JSX.Element> => {
   const { id } = await params
 
   return (
@@ -7,3 +7,5 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     </main>
   )
 }
+
+export default ProductPage

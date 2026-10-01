@@ -1,3 +1,5 @@
+import { cva } from "class-variance-authority"
+
 type SidebarCategory = {
   label: string
   count: number
@@ -15,21 +17,38 @@ const CATEGORIES: SidebarCategory[] = [
 
 const ACTIVE_CATEGORY: string = "All products"
 
-function SidebarHeading({ children }: { children: React.ReactNode }): React.JSX.Element {
-  return <h2 className="text-[11px] font-medium tracking-widest text-muted uppercase">{children}</h2>
+const categoryButton = cva("flex h-11 w-full items-center justify-between gap-4 rounded-lg px-3 text-sm", {
+  variants: {
+    active: {
+      true: "bg-ink text-white",
+      false: "hover:bg-black/5",
+    },
+  },
+})
+
+const categoryCount = cva("text-xs", {
+  variants: {
+    active: {
+      true: "text-white/80",
+      false: "text-muted",
+    },
+  },
+})
+
+const SidebarHeading = ({ children }: { children: React.ReactNode }): React.JSX.Element => {
+  return <h2 className="text-2xs font-medium tracking-widest text-muted uppercase">{children}</h2>
 }
 
-function CategoryList(): React.JSX.Element {
+const CategoryList = (): React.JSX.Element => {
   return (
     <ul className="mt-3 flex flex-wrap gap-2 lg:flex-col lg:gap-1">
       {CATEGORIES.map((category) => {
         const isActive: boolean = category.label === ACTIVE_CATEGORY
-        const stateClasses: string = isActive ? "bg-ink text-white" : "hover:bg-black/5"
         return (
           <li key={category.label} className="shrink-0">
-            <button type="button" aria-pressed={isActive} className={`flex h-11 w-full items-center justify-between gap-4 rounded-lg px-3 text-sm ${stateClasses}`}>
+            <button type="button" aria-pressed={isActive} className={categoryButton({ active: isActive })}>
               <span className="whitespace-nowrap">{category.label}</span>
-              <span className={`text-xs ${isActive ? "text-white/80" : "text-muted"}`}>{category.count}</span>
+              <span className={categoryCount({ active: isActive })}>{category.count}</span>
             </button>
           </li>
         )
@@ -38,7 +57,7 @@ function CategoryList(): React.JSX.Element {
   )
 }
 
-function PriceRange(): React.JSX.Element {
+const PriceRange = (): React.JSX.Element => {
   const inputClasses: string = "mt-1 h-11 w-full min-w-0 rounded-lg border border-line bg-white px-3 text-sm outline-none focus:border-ink"
   return (
     <div className="mt-3 flex items-end gap-2">
@@ -55,7 +74,7 @@ function PriceRange(): React.JSX.Element {
   )
 }
 
-export function CatalogSidebar(): React.JSX.Element {
+export const CatalogSidebar = (): React.JSX.Element => {
   return (
     <aside className="flex min-w-0 flex-col gap-6">
       <section>

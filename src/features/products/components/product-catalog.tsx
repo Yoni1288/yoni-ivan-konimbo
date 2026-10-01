@@ -1,9 +1,10 @@
 import Link from "next/link"
+import { Suspense } from "react"
 import { CatalogSidebar } from "./catalog-sidebar"
 import { CatalogToolbar } from "./catalog-toolbar"
-import { ProductGrid } from "./product-grid"
+import { ProductGrid, ProductGridSkeleton } from "./product-grid"
 
-export function ProductCatalog(): React.JSX.Element {
+export const ProductCatalog = (): React.JSX.Element => {
   return (
     <main className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 sm:pt-8">
       <nav aria-label="Breadcrumb" className="text-xs text-muted">
@@ -19,9 +20,11 @@ export function ProductCatalog(): React.JSX.Element {
         <CatalogToolbar />
       </div>
 
-      <div className="mt-6 grid gap-8 lg:grid-cols-[180px_1fr] lg:gap-6">
+      <div className="mt-6 grid gap-8 lg:grid-cols-sidebar lg:gap-6">
         <CatalogSidebar />
-        <ProductGrid />
+        <Suspense fallback={<ProductGridSkeleton />}>
+          <ProductGrid />
+        </Suspense>
       </div>
     </main>
   )

@@ -1,7 +1,7 @@
 import { z } from "zod"
 import { HttpError } from "@/shared/errors/http-error"
 
-export function parseSearchParams<TSchema extends z.ZodType>(request: Request, schema: TSchema): z.infer<TSchema> {
+export const parseSearchParams = <TSchema extends z.ZodType>(request: Request, schema: TSchema): z.infer<TSchema> => {
   const searchParams: URLSearchParams = new URL(request.url).searchParams
   // An empty param such as `?q=` means "no filter", not an invalid value.
   const nonEmptyParams: [string, string][] = [...searchParams.entries()].filter(([, value]) => value !== "")

@@ -46,3 +46,8 @@ export const productsResponseSchema: z.ZodType<ProductsResponse> = z.object({
   limit: z.number(),
   offset: z.number(),
 })
+
+// URL params are user-editable, so an invalid offset falls back to the first page instead of throwing.
+export const productFiltersSchema = z.object({
+  offset: z.coerce.number().int().min(0).catch(0),
+})

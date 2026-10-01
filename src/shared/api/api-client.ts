@@ -1,7 +1,7 @@
 import type { z } from "zod"
 import { HttpError } from "@/shared/errors/http-error"
 
-export async function apiGet<T>(path: string, schema: z.ZodType<T>): Promise<T> {
+export const apiGet = async <T>(path: string, schema: z.ZodType<T>): Promise<T> => {
   const response: Response = await fetch(path)
 
   if (!response.ok) {

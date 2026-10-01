@@ -69,9 +69,11 @@ A take-home "Product Quick View" storefront feature:
 
 ```tsx
 // src/app/products/page.tsx
-export default function ProductsPage(): React.JSX.Element {
+const ProductsPage = (): React.JSX.Element => {
   return <ProductCatalog />
 }
+
+export default ProductsPage
 ```
 
 ```ts
@@ -167,7 +169,7 @@ sendError(log)
 
 ```ts
 // src/shared/errors/with-error-handling.ts
-export function withErrorHandling<TContext>(handler: (request: Request, context: TContext) => Promise<Response>) {
+export const withErrorHandling = <TContext>(handler: (request: Request, context: TContext) => Promise<Response>) => {
   return async (request: Request, context: TContext): Promise<Response> => {
     try {
       return await handler(request, context)
@@ -352,6 +354,54 @@ const itemCount: number = useCartStore((state) => selectCartItemCount(state))
 - Run `pnpm format` before committing. Never hand-format against the Prettier config.
 - Do not use ESLint's `max-len` rule; Prettier owns line length.
 
+## 15. Code Style
+
+- Always define React components as arrow functions assigned to a `const`, never with the `function` keyword.
+- Keep the explicit return type on the arrow function.
+- Enforced by ESLint: `react/function-component-definition` (arrow functions for named and unnamed components) and `func-style: "expression"`.
+- Run the lint script after making changes and fix any errors.
+
+✅ Correct:
+
+```tsx
+const StockBadge = ({ status }: { status: StockStatus }): React.JSX.Element | null => {
+  // ...
+}
+```
+
+❌ Wrong:
+
+```tsx
+function StockBadge({ status }: { status: StockStatus }): React.JSX.Element | null {
+  // ...
+}
+```
+
+## 16. Styling
+
+The project uses **Tailwind CSS v4**: there is no `tailwind.config`; theme tokens live in the `@theme` block of `src/app/globals.css`.
+
+- Use Tailwind utility classes only. No inline `style`, CSS modules, or `@apply` for component styles.
+- Use theme tokens (colors, spacing, font sizes). Don't use arbitrary values like `text-[11px]`. If a value is missing, add a token to `@theme` in `src/app/globals.css` (e.g. `--text-2xs`, `--color-swatch-*`, `--grid-template-columns-sidebar`) and mention it.
+- Values that come from data (e.g. a swatch color) map to full class names built from tokens (`bg-swatch-black`), never to `style`. Write class names out in full so Tailwind can find them.
+- Use `cn()` from `@/shared/utils/cn` (clsx + tailwind-merge) to combine or add conditional classes. Never build class strings with template literals.
+- Use `cva` from `class-variance-authority` for components with visual variants (e.g. `stockBadge`, `pageButton`, `categoryButton`). Don't branch between full class strings.
+- Mobile first: base classes target mobile, then `sm:` / `md:` / `lg:` add larger layouts (see section 11).
+- `prettier-plugin-tailwindcss` sorts class names on `pnpm format`, including inside `cn()` and `cva()`. Don't sort them by hand.
+
+```tsx
+// ✅
+const stockBadge = cva("rounded-full px-2.5 py-1 text-2xs font-medium", {
+  variants: { status: { "low-stock": "bg-badge-low text-ink", "sold-out": "bg-ink text-white" } },
+})
+<span className={stockBadge({ status })} />
+<div className={cn("rounded-xl", tileClass)} />
+
+// ❌
+<span className={status === "sold-out" ? "rounded-full bg-ink text-[11px]" : "rounded-full bg-badge-low text-[11px]"} />
+<li style={{ backgroundColor: swatch.hex }} />
+```
+
 ---
 
 ## Database (Prisma + PostgreSQL)
@@ -381,7 +431,7 @@ import { PrismaClient } from "@/generated/prisma/client"
 
 const globalForPrisma = globalThis as typeof globalThis & { prisma?: PrismaClient }
 
-function createPrismaClient(): PrismaClient {
+const createPrismaClient = (): PrismaClient => {
   const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
   return new PrismaClient({ adapter })
 }
@@ -407,7 +457,7 @@ const productSummarySelect = {
 
 export type ProductSummary = Prisma.ProductGetPayload<{ select: typeof productSummarySelect }>
 
-export async function findProductSummaryById(id: string): Promise<ProductSummary | null> {
+export const findProductSummaryById = async (id: string): Promise<ProductSummary | null> => {
   return prisma.product.findUnique({ where: { id }, select: productSummarySelect })
 }
 ```

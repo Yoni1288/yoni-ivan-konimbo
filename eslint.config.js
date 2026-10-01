@@ -43,6 +43,8 @@ export default [
       "react/prop-types": "off",
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+      "react/function-component-definition": ["error", { namedComponents: "arrow-function", unnamedComponents: "arrow-function" }],
+      "func-style": ["error", "expression"],
     },
   },
   {
@@ -59,6 +61,13 @@ export default [
           message: "Use `items.length` instead of `items.length > 0`.",
         },
       ],
+    },
+  },
+  {
+    // src/app/api/ must not be modified (see CLAUDE.md), so its existing function declarations are exempt.
+    files: ["src/app/api/**/*.{ts,tsx}"],
+    rules: {
+      "func-style": "off",
     },
   },
 ]

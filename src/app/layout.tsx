@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Inter, Instrument_Serif } from "next/font/google"
 import { SiteFooter } from "@/shared/components/site-footer"
 import { SiteHeader } from "@/shared/components/site-header"
+import { cn } from "@/shared/utils/cn"
 import { Providers } from "./providers"
 import "./globals.css"
 
@@ -13,10 +14,10 @@ export const metadata: Metadata = {
   description: "Thoughtfully made goods for everyday life",
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }): React.JSX.Element {
+const RootLayout = ({ children }: { children: React.ReactNode }): React.JSX.Element => {
   return (
-    <html lang="en" className={`${inter.variable} ${instrumentSerif.variable}`}>
-      <body className="flex min-h-screen flex-col font-sans antialiased">
+    <html lang="en" className={cn(inter.variable, instrumentSerif.variable)}>
+      <body className="flex min-h-screen flex-col bg-canvas font-sans text-ink antialiased">
         <Providers>
           <SiteHeader />
           <div className="flex-1">{children}</div>
@@ -26,3 +27,5 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
     </html>
   )
 }
+
+export default RootLayout
