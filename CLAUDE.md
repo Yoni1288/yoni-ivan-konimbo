@@ -3,6 +3,7 @@
 ## Project Constraints (README — these override everything below)
 
 - **Do not modify:** `mock-data/`, `src/app/api/`, `src/types/product.ts`. Adding new files, routes, or extended types is fine.
+  - The one exception: the `/map-s3-images` command (`scripts/map-s3-images.ts`) may change the `thumbnail` and `images` fields of `mock-data/products.json`. Nothing else may change `mock-data/`.
 - `pnpm install && pnpm dev` must work from a clean clone. A `postinstall` script runs `prisma generate`; the one-time database setup is in section 10.
 - **Over-engineering is not a plus.** Prefer clean, focused work over feature count. The task is scoped at about 6 hours.
 

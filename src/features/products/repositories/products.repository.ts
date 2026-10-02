@@ -1,7 +1,11 @@
 import type { Prisma } from "@/generated/prisma/client"
+import { getOrSetJson } from "@/shared/cache/cache-json"
 import { prisma } from "@/shared/db/prisma"
 import type { Product, ProductOption, ProductsResponse, ProductVariant } from "@/types/product"
+import { productsResponseSchema } from "../products.schemas"
 import type { ProductListQuery, ProductSort } from "../products.types"
+
+const PRODUCTS_CACHE_TTL_SECONDS: number = 5 * 60
 
 const productSelect = {
   id: true,
@@ -116,7 +120,7 @@ const buildProductWhere = (query: ProductListQuery): Prisma.ProductWhereInput =>
   return { AND: conditions }
 }
 
-export const findProducts = async (query: ProductListQuery): Promise<ProductsResponse> => {
+const queryProducts = async (query: ProductListQuery): Promise<ProductsResponse> => {
   const { sort, limit, offset } = query
   const where: Prisma.ProductWhereInput = buildProductWhere(query)
   const [count, rows] = await prisma.$transaction([
@@ -125,6 +129,12 @@ export const findProducts = async (query: ProductListQuery): Promise<ProductsRes
   ])
 
   return { products: rows.map(toProduct), count, limit, offset }
+}
+
+// Cached here rather than in the route, because src/app/api/products/ must not be modified.
+// The key is the parsed query, so param order and defaults don't create separate entries.
+export const findProducts = async (query: ProductListQuery): Promise<ProductsResponse> => {
+  return getOrSetJson(JSON.stringify(query), PRODUCTS_CACHE_TTL_SECONDS, productsResponseSchema, () => queryProducts(query))
 }
 
 export const findProductById = async (id: string): Promise<Product | null> => {

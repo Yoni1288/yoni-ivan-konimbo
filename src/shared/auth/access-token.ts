@@ -1,6 +1,7 @@
 import "server-only"
-import { SignJWT } from "jose"
+import { jwtVerify, SignJWT } from "jose"
 import { env } from "@/shared/config/env.server"
+import { HttpError } from "@/shared/errors/http-error"
 import type { AccessToken, AccessTokenUser } from "./auth-token.types"
 
 export const ACCESS_TOKEN_TTL_SECONDS: number = 60 * 60
@@ -20,4 +21,18 @@ export const signAccessToken = async (user: AccessTokenUser): Promise<AccessToke
     .sign(signingKey)
 
   return { token, expiresAt: new Date(expiresAtSeconds * 1000).toISOString() }
+}
+
+// Returns the user id from a valid, unexpired token. Any problem with the token is the same 401 for the client.
+export const verifyAccessToken = async (token: string): Promise<number> => {
+  const { payload } = await jwtVerify(token, signingKey, { algorithms: ["HS256"] }).catch(() => {
+    throw new HttpError(401, "Sign in to continue")
+  })
+  const userId: number = Number(payload.sub)
+
+  if (!Number.isInteger(userId) || userId <= 0) {
+    throw new HttpError(401, "Sign in to continue")
+  }
+
+  return userId
 }
