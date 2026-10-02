@@ -58,4 +58,4 @@ I don't think I should build this part differently, I think this is a good imple
 In general I have tests for each route that I run after each change.
 
 # Surprises
-It wasn't 100% clear if I need to build this website using the "mock-data" as is (NoSQL) or use the exact same data and manage it as I think the website should be built. My native DB experience is more NoSQL than SQL, but I thought NoSQL is less good for this use case.
+It wasn't 100% clear if I need to build this website using the "mock-data" as is (NoSQL) or use the exact same data and manage it as I think the website should be built. My native DB experience is more NoSQL than SQL, but I thought NoSQL is less good for this use case. But it does use the "src/types/product.ts" and it was not changed !
