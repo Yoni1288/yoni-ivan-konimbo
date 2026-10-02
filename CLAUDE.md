@@ -14,7 +14,6 @@ A take-home "Product Quick View" storefront feature:
 - Product grid with search and filters at `/products`
 - Quick View modal (variant selector, price and stock per variant)
 - Client-side cart drawer and a checkout form with validation that only shows a success message (no order backend)
-- A `DECISIONS.md` covering key decisions, tradeoffs, verification and surprises
 
 ## Tech Stack
 
@@ -276,7 +275,6 @@ Classify state before writing it, then put it in exactly one place:
 | Cart items, cart drawer open              | Global client store                                | Zustand                              |
 | Checkout form                             | Form state                                         | React Hook Form + Zod                |
 
-- TanStack Query, Zustand, React Hook Form and `@hookform/resolvers` are not installed yet. The README requires every added library to be justified in `DECISIONS.md`, including these.
 - **Do not add** Redux, Jotai, extra Context stores, or any other state library.
 - **Never duplicate state.** If a value can be computed from other state, compute it (`useMemo` or a selector). Never store it.
 
@@ -348,7 +346,7 @@ const itemCount: number = useCartStore((state) => selectCartItemCount(state))
 
 ### Money
 
-- Prices in `mock-data/` are in **minor units** (agorot): amounts run 11900–149900 ILS and are all multiples of 100, so `29900` means ₪299.00. Divide by 100 before formatting. This differs from Medusa v2, which uses major units; record it in `DECISIONS.md` as a surprise.
+- Prices in `mock-data/` are in **minor units** (agorot): amounts run 11900–149900 ILS and are all multiples of 100, so `29900` means ₪299.00. Divide by 100 before formatting. This differs from Medusa v2, which uses major units.
 - Format all prices through one shared helper using `Intl.NumberFormat` and the product's currency code.
 
 ## 14. Formatting
@@ -415,7 +413,7 @@ const stockBadge = cva("rounded-full px-2.5 py-1 text-2xs font-medium", {
 - Client env (only if ever needed) lives in `src/shared/config/env.client.ts`. Browser variables must be prefixed `NEXT_PUBLIC_` and referenced literally (`process.env.NEXT_PUBLIC_X`), because Next.js only inlines literal references at build time.
 - Never put secrets in `NEXT_PUBLIC_` variables. They are shipped to the browser.
 - Every new variable is added to the Zod schema and to `.env.example` in the same change.
-- No env library (e.g. `@t3-oss/env-nextjs`). A small Zod module is enough; this is noted in `DECISIONS.md`.
+- No env library (e.g. `@t3-oss/env-nextjs`). A small Zod module is enough.
 
 ```ts
 // src/shared/config/env.server.ts

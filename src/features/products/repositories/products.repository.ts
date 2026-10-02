@@ -1,4 +1,5 @@
 import type { Prisma } from "@/generated/prisma/client"
+import type { SearchQuery } from "@/features/search/search.types"
 import { getOrSetJson } from "@/shared/cache/cache-json"
 import { prisma } from "@/shared/db/prisma"
 import type { Product, ProductOption, ProductsResponse, ProductVariant } from "@/types/product"
@@ -145,4 +146,12 @@ export const findProductById = async (id: string): Promise<Product | null> => {
   }
 
   return toProduct(row)
+}
+
+export const searchProductsByTitle = async (query: SearchQuery): Promise<Product[]> => {
+  const { q, limit } = query
+  const where: Prisma.ProductWhereInput = { AND: [hasCollection, { title: { contains: escapeLikeWildcards(q), mode: "insensitive" } }] }
+  const rows: ProductRow[] = await prisma.product.findMany({ where, select: productSelect, orderBy: [{ title: "asc" }, { id: "asc" }], take: limit })
+
+  return rows.map(toProduct)
 }

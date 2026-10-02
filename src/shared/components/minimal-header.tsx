@@ -6,7 +6,7 @@ export const MinimalHeader = ({ children }: { children: React.ReactNode }): Reac
     <header className="border-b border-line">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <Link href="/" className="font-serif text-2xl">
-          Goodsmith
+          Yoni Ivan
         </Link>
         {children}
       </div>

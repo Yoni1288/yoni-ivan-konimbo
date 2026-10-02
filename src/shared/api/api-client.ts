@@ -24,8 +24,8 @@ const parseResponse = async <T>(response: Response, path: string, schema: z.ZodT
   return schema.parse(body)
 }
 
-export const apiGet = async <T>(path: string, schema: z.ZodType<T>, headers: Record<string, string> = {}): Promise<T> => {
-  const response: Response = await fetch(path, { headers })
+export const apiGet = async <T>(path: string, schema: z.ZodType<T>, headers: Record<string, string> = {}, signal?: AbortSignal): Promise<T> => {
+  const response: Response = await fetch(path, { headers, signal })
   return parseResponse(response, path, schema)
 }
 
