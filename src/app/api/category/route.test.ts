@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, it } from "vitest"
-import { CATEGORY_FILTER_KEY } from "@/features/categories/repositories/category-filter.repository"
+import { CATEGORY_FILTER_KEY } from "@/features/categories/categories.constants"
 import type { CategoryFilter } from "@/features/categories/categories.types"
 import { redis } from "@/shared/cache/redis"
 import { createTestRequest } from "@/shared/testing/create-test-request"

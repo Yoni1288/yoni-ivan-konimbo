@@ -20,4 +20,4 @@ FROM base AS runner
 ENV NODE_ENV=production
 COPY --from=build /app ./
 EXPOSE 3000
-CMD ["sh", "-c", "pnpm prisma migrate deploy && pnpm prisma db seed && pnpm start"]
+CMD ["pnpm", "start"]

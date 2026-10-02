@@ -5,7 +5,7 @@ import { RegisterCard } from "@/features/auth/components/register-card"
 import { parseRedirectPath } from "@/features/auth/utils/redirect-path"
 
 export const metadata: Metadata = {
-  title: "Create account · Goodsmith",
+  title: "Create account · Yoni Ivan",
 }
 
 const RegisterPage = async ({ searchParams }: AuthPageProps): Promise<React.JSX.Element> => {

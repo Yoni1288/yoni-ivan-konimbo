@@ -25,20 +25,34 @@ services:
       timeout: 5s
       retries: 5
 
-  app:
+  # One-shot setup that runs after Postgres and Redis are healthy, then exits. For `pnpm dev` on the host, start it with `docker compose up -d db-init`.
+  # The image mapping edits only the image's copy of mock-data/products.json, never the host file.
+  db-init:
     build: .
     env_file: .env
     environment:
-      # Inside Compose the database is reached by service name, not localhost. The app container runs migrations and the seed on start.
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       REDIS_URL: redis://redis:6379
-    ports:
-      - "${APP_PORT:-3000}:3000"
+    command: ["sh", "-c", "pnpm tsx scripts/map-s3-images.ts && pnpm prisma migrate deploy && pnpm prisma db seed && pnpm tsx scripts/populate-collection-filter.ts"]
+    restart: "no"
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+
+  app:
+    build: .
+    env_file: .env
+    environment:
+      # Inside Compose the database is reached by service name, not localhost.
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    depends_on:
+      db-init:
+        condition: service_completed_successfully
 
 volumes:
   postgres_data:

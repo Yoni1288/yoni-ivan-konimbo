@@ -53,7 +53,7 @@ A single JSON string:
 
 - This command only targets the dev services from `docker-compose.yml`. Never run it against the test database (`.env.test`).
 - Only write the `collection-filter` key. Don't run `FLUSHALL`, `FLUSHDB` or `DEL` on other keys.
-- The key has no expiry, so run this command again whenever the catalog data changes (for example after `/mock-to-db`).
+- The key has no expiry, so run this command again whenever the catalog data changes (for example after `/mock-to-db`). The `db-init` Docker service also writes it on every `docker compose up`, using `scripts/populate-collection-filter.ts`.
 
 ## Report
 

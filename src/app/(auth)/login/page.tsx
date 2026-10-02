@@ -5,7 +5,7 @@ import { LoginCard } from "@/features/auth/components/login-card"
 import { parseRedirectPath } from "@/features/auth/utils/redirect-path"
 
 export const metadata: Metadata = {
-  title: "Account · Goodsmith",
+  title: "Account · Yoni Ivan",
 }
 
 const LoginPage = async ({ searchParams }: AuthPageProps): Promise<React.JSX.Element> => {

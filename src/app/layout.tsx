@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 const instrumentSerif = Instrument_Serif({ subsets: ["latin"], weight: "400", variable: "--font-instrument-serif" })
 
 export const metadata: Metadata = {
-  title: "Goodsmith",
+  title: "Yoni Ivan",
   description: "Thoughtfully made goods for everyday life",
 }
 

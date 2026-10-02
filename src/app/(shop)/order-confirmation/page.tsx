@@ -4,7 +4,7 @@ import type { OrderConfirmationPageProps } from "@/features/checkout/checkout.ty
 import { OrderConfirmationView } from "@/features/checkout/components/order-confirmation-view"
 
 export const metadata: Metadata = {
-  title: "Order confirmed · Goodsmith",
+  title: "Order confirmed · Yoni Ivan",
 }
 
 const OrderConfirmationPage = async ({ searchParams }: OrderConfirmationPageProps): Promise<React.JSX.Element> => {
